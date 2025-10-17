@@ -2,7 +2,12 @@
 
 @section('content')
 <div class="max-w-2xl mx-auto mt-6">
-    <h1 class="text-xl font-bold mb-4">「{{ $genre->name }}」のアイテム一覧</h1>
+    <h1 class="text-xl font-bold mb-4">
+        「{{ $genre->name }}」のアイテム一覧
+        @if (!empty($isShared) && $isShared)
+            <span class="text-sm text-gray-500 ml-2">（共有）</span>
+        @endif
+    </h1>
 
     @if(session('success'))
     <div class="p-2 mb-4 bg-green-100 border border-green-400 text-green-700 rounded">

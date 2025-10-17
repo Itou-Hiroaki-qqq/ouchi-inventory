@@ -3,18 +3,30 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Item;
 use App\Models\Genre;
-use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use App\Services\ShareService;
 
 class ItemController extends Controller
 {
+    protected ShareService $shareService;
+
+    public function __construct(ShareService $shareService)
+    {
+        $this->shareService = $shareService;
+    }
+
     /**
      * ジャンルごとのアイテム一覧を表示
      */
     public function index(Genre $genre)
     {
-        if ($genre->user_id !== Auth::id()) {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$this->shareService->canAccessGenre($user, $genre)) {
             abort(403);
         }
 
@@ -22,7 +34,7 @@ class ItemController extends Controller
 
         return view('items.index', [
             'genre' => $genre,
-            'items' => $items
+            'items' => $items,
         ]);
     }
 
@@ -31,7 +43,10 @@ class ItemController extends Controller
      */
     public function store(Request $request, Genre $genre)
     {
-        if ($genre->user_id !== Auth::id()) {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$this->shareService->canAccessGenre($user, $genre)) {
             abort(403);
         }
 
@@ -54,7 +69,10 @@ class ItemController extends Controller
      */
     public function edit(Genre $genre, Item $item)
     {
-        if ($genre->user_id !== Auth::id() || $item->genre_id !== $genre->id) {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$this->shareService->canAccessGenre($user, $genre) || $item->genre_id !== $genre->id) {
             abort(403);
         }
 
@@ -69,7 +87,10 @@ class ItemController extends Controller
      */
     public function update(Request $request, Genre $genre, Item $item)
     {
-        if ($genre->user_id !== Auth::id() || $item->genre_id !== $genre->id) {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$this->shareService->canAccessGenre($user, $genre) || $item->genre_id !== $genre->id) {
             abort(403);
         }
 
@@ -96,7 +117,10 @@ class ItemController extends Controller
      */
     public function destroy(Genre $genre, Item $item)
     {
-        if ($genre->user_id !== Auth::id() || $item->genre_id !== $genre->id) {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$this->shareService->canAccessGenre($user, $genre) || $item->genre_id !== $genre->id) {
             abort(403);
         }
 
@@ -110,12 +134,15 @@ class ItemController extends Controller
      */
     public function increment(Genre $genre, Item $item)
     {
-        if ($genre->user_id !== Auth::id() || $item->genre_id !== $genre->id) {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$this->shareService->canAccessGenre($user, $genre) || $item->genre_id !== $genre->id) {
             abort(403);
         }
 
         $item->quantity += 1;
-        $item->total_added_count += 1; // よく消費する順ソート用カウント
+        $item->total_added_count += 1;
         $item->save();
 
         return redirect()->route('items.index', $genre)->with('success', '数量を増やしました。');
@@ -126,7 +153,10 @@ class ItemController extends Controller
      */
     public function decrement(Genre $genre, Item $item)
     {
-        if ($genre->user_id !== Auth::id() || $item->genre_id !== $genre->id) {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$this->shareService->canAccessGenre($user, $genre) || $item->genre_id !== $genre->id) {
             abort(403);
         }
 

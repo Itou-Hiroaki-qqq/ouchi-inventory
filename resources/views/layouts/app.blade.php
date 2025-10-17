@@ -18,6 +18,20 @@
         <div class="min-h-screen bg-gray-100">
             @include('layouts.navigation')
 
+            {{-- 追加ナビゲーションリンク --}}
+            <nav class="bg-white border-b border-gray-100">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between h-16">
+                        <div class="flex">
+                            <a href="{{ route('genres.index') }}" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-200">ジャンル一覧</a>
+                            <a href="{{ route('purchases.index') }}" class="ml-4 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-200">次回購入リスト</a>
+                            <a href="{{ route('shares.index') }}" class="ml-4 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-200">共有設定</a>
+                            <a href="{{ route('shares.sharedToMe') }}" class="ml-4 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-200">共有されているリスト</a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
             <!-- Page Heading -->
             @isset($header)
                 <header class="bg-white shadow">
@@ -29,7 +43,7 @@
 
             <!-- Page Content -->
             <main>
-                {{ $slot }}
+                @yield('content')
             </main>
         </div>
     </body>
