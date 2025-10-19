@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Share;
 use App\Models\User;
+use App\Models\Genre;
 
 class ShareController extends Controller
 {
@@ -28,10 +29,21 @@ class ShareController extends Controller
     public function sharedToMe()
     {
         $user = Auth::user();
+
+        // 共有元ユーザー一覧（owner_id -> shared_user_id = 自分）
         $sharedByUsers = $user->sharedBy()->with('owner')->get();
+
+        // オーナー情報を取得（複数ある場合は最初の1人を使う例）
+        $firstShare = $sharedByUsers->first();
+        $owner = $firstShare ? $firstShare->owner : null;
+
+        // 関連するジャンル（オーナーのもの）を取得（任意）
+        $sharedGenreIds = Genre::where('user_id', $owner?->id)->pluck('id');
 
         return view('shares.sharedToMe', [
             'sharedByUsers' => $sharedByUsers,
+            'owner' => $owner,
+            'sharedGenreIds' => $sharedGenreIds,
         ]);
     }
 

@@ -4,15 +4,16 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\Genre;
+use App\Models\Item;
+use App\Models\User;
 
 class ShareService
 {
     /**
      * ログインユーザーがジャンルにアクセスできるか判定
      */
-    public function canAccessGenre($user, Genre $genre): bool
+    public function canAccessGenre(User $user, Genre $genre): bool
     {
-        // $user は \App\Models\User 型である前提
         $userId = $user->id;
 
         // 所有者ならアクセス可
@@ -20,11 +21,27 @@ class ShareService
             return true;
         }
 
-        // 共有されているかどうか
-        return $genre->user
+        $ownerUser = $genre->user;
+        if (!$ownerUser) {
+            return false;
+        }
+
+        return $ownerUser
             ->sharedWith()
             ->where('shared_user_id', $userId)
             ->exists();
+    }
+
+    /**
+     * アイテム設定ページの閲覧権限を判定（所有者または共有ユーザー）
+     */
+    public function canViewItem(User $user, Genre $genre, Item $item): bool
+    {
+        if ($item->genre_id !== $genre->id) {
+            return false;
+        }
+
+        return $this->canAccessGenre($user, $genre);
     }
 
     /**
@@ -32,7 +49,7 @@ class ShareService
      *
      * @return array<int>
      */
-    public function getAccessibleGenreIds($user = null): array
+    public function getAccessibleGenreIds(?User $user = null): array
     {
         if (is_null($user)) {
             $user = Auth::user();
@@ -40,10 +57,8 @@ class ShareService
 
         $userId = $user->id;
 
-        // 自分のジャンルID
         $ownGenreIds = Genre::where('user_id', $userId)->pluck('id')->toArray();
 
-        // 共有されているジャンルID（他のユーザーのジャンルを共有先として持つ）
         $sharedGenreIds = Genre::whereIn('user_id', function ($query) use ($userId) {
             $query->select('owner_id')
                 ->from('shares')
@@ -56,7 +71,7 @@ class ShareService
     /**
      * ジャンルを編集できるか判定（通常は所有者のみ）
      */
-    public function canEditGenre($user, Genre $genre): bool
+    public function canEditGenre(User $user, Genre $genre): bool
     {
         return $genre->user_id === $user->id;
     }
@@ -64,7 +79,7 @@ class ShareService
     /**
      * ジャンルを削除できるか判定（通常は所有者のみ）
      */
-    public function canDeleteGenre($user, Genre $genre): bool
+    public function canDeleteGenre(User $user, Genre $genre): bool
     {
         return $genre->user_id === $user->id;
     }

@@ -18,9 +18,6 @@ class ItemController extends Controller
         $this->shareService = $shareService;
     }
 
-    /**
-     * ジャンルごとのアイテム一覧を表示
-     */
     public function index(Genre $genre)
     {
         /** @var User $user */
@@ -31,15 +28,23 @@ class ItemController extends Controller
         }
 
         $items = $genre->items()->orderByDesc('total_added_count')->get();
+        $canEditGenre = $this->shareService->canEditGenre($user, $genre);
+
+        foreach ($items as $item) {
+            $item->canEdit = $canEditGenre;
+            $item->canDelete = $this->shareService->canDeleteGenre($user, $genre);
+        }
 
         return view('items.index', [
             'genre' => $genre,
             'items' => $items,
+            'canEditGenre' => $canEditGenre,
+            'isShared' => $genre->user_id !== $user->id,
         ]);
     }
 
     /**
-     * 新しいアイテムを登録
+     * アイテム登録（登録後はトップページにリダイレクト）
      */
     public function store(Request $request, Genre $genre)
     {
@@ -56,34 +61,32 @@ class ItemController extends Controller
 
         $item = new Item();
         $item->genre_id = $genre->id;
+        $item->user_id = $user->id;
         $item->name = $request->name;
         $item->quantity = 0;
         $item->total_added_count = 0;
         $item->save();
 
-        return redirect()->route('items.index', $genre)->with('success', 'アイテムを追加しました。');
+        return redirect()->route('dashboard')->with('success', 'アイテムを追加しました。');
     }
 
-    /**
-     * アイテム編集画面表示
-     */
     public function edit(Genre $genre, Item $item)
     {
         /** @var User $user */
         $user = Auth::user();
 
-        if (!$this->shareService->canAccessGenre($user, $genre) || $item->genre_id !== $genre->id) {
+        if (!$this->shareService->canViewItem($user, $genre, $item) || $item->genre_id !== $genre->id) {
             abort(403);
         }
 
         return view('items.edit', [
             'genre' => $genre,
-            'item' => $item,
+            'item'  => $item,
         ]);
     }
 
     /**
-     * アイテム更新処理
+     * アイテム更新（更新後はトップページへ）
      */
     public function update(Request $request, Genre $genre, Item $item)
     {
@@ -95,25 +98,17 @@ class ItemController extends Controller
         }
 
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'quantity' => ['nullable', 'integer', 'min:0'],
             'note' => ['nullable', 'string', 'max:1000'],
         ]);
-
-        $item->name = $request->name;
-
-        if (!is_null($request->quantity)) {
-            $item->quantity = $request->quantity;
-        }
 
         $item->note = $request->note;
         $item->save();
 
-        return redirect()->route('items.index', $genre)->with('success', 'アイテムを更新しました。');
+        return redirect()->route('dashboard')->with('success', 'メモを保存しました。');
     }
 
     /**
-     * アイテム削除処理
+     * アイテム削除（削除後はトップページへ）
      */
     public function destroy(Genre $genre, Item $item)
     {
@@ -126,11 +121,11 @@ class ItemController extends Controller
 
         $item->delete();
 
-        return redirect()->route('items.index', $genre)->with('success', 'アイテムを削除しました。');
+        return redirect()->route('dashboard')->with('success', 'アイテムを削除しました。');
     }
 
     /**
-     * 数量を +1 する
+     * 数量を +1（処理後はトップページへ）
      */
     public function increment(Genre $genre, Item $item)
     {
@@ -145,11 +140,11 @@ class ItemController extends Controller
         $item->total_added_count += 1;
         $item->save();
 
-        return redirect()->route('items.index', $genre)->with('success', '数量を増やしました。');
+        return redirect()->route('dashboard')->with('success', '数量を増やしました。');
     }
 
     /**
-     * 数量を -1 する（0未満にはならない）
+     * 数量を -1（処理後はトップページへ）
      */
     public function decrement(Genre $genre, Item $item)
     {
@@ -165,6 +160,6 @@ class ItemController extends Controller
             $item->save();
         }
 
-        return redirect()->route('items.index', $genre)->with('success', '数量を減らしました。');
+        return redirect()->route('dashboard')->with('success', '数量を減らしました。');
     }
 }

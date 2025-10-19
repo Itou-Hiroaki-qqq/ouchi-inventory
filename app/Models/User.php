@@ -36,7 +36,7 @@ class User extends Authenticatable
      */
     public function sharedWith(): HasMany
     {
-        return $this->hasMany(Share::class, 'owner_id');
+        return $this->hasMany(\App\Models\Share::class, 'owner_id');
     }
 
     /**
@@ -44,6 +44,6 @@ class User extends Authenticatable
      */
     public function sharedBy(): HasMany
     {
-        return $this->hasMany(Share::class, 'shared_user_id');
+        return $this->hasMany(\App\Models\Share::class, 'shared_user_id');
     }
 }

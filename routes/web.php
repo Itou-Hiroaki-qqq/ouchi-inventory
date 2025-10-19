@@ -9,7 +9,7 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ShareController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/dashboard');
 });
 
 // /dashboard を InventoryController の index() へルーティング
@@ -23,8 +23,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // ジャンルの一覧表示・追加
-    Route::resource('genres', GenreController::class)->only(['index', 'store']);
+    // ジャンルの一覧表示・追加・編集・削除
+    Route::resource('genres', GenreController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
 
     // ジャンルごとのアイテム操作群
     Route::prefix('genres/{genre}')->group(function () {

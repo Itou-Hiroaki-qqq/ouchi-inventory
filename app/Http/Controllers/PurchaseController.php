@@ -57,8 +57,9 @@ class PurchaseController extends Controller
 
         if (!Purchase::where('item_id', $item->id)->exists()) {
             Purchase::create([
-                'item_id' => $item->id,
+                'item_id'  => $item->id,
                 'genre_id' => $genre->id,
+                'user_id'  => $user->id,
             ]);
         }
 
