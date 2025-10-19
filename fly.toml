@@ -1,0 +1,42 @@
+# fly.toml app configuration file generated for ouchi-inventory on 2025-10-20T02:03:45+09:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'ouchi-inventory'
+primary_region = 'nrt'
+console_command = 'php /var/www/html/artisan tinker'
+
+[build]
+  [build.args]
+    NODE_VERSION = '18'
+    PHP_VERSION = '8.4'
+
+[env]
+  APP_URL = 'https://ouchi-inventory.fly.dev/'
+  APP_NAME = 'ouchi-inventory'
+  APP_DEBUG = false
+  DB_CONNECTION = 'pgsql'
+  DB_HOST = 'aws-1-ap-northeast-1.pooler.supabase.com'
+  DB_PORT = 5432
+  DB_DATABASE = 'postgres'
+  DB_USERNAME = 'postgres.izycmpeyxkdsozweychz'
+
+  APP_ENV = 'production'
+  LOG_CHANNEL = 'stderr'
+  LOG_LEVEL = 'info'
+  LOG_STDERR_FORMATTER = 'Monolog\Formatter\JsonFormatter'
+  SESSION_DRIVER = 'cookie'
+  SESSION_SECURE_COOKIE = 'true'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '256mb'
