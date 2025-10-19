@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\GenreController;
@@ -8,8 +9,9 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ShareController;
 
+// トップページへのアクセス時のリダイレクトを条件付きに変更
 Route::get('/', function () {
-    return redirect('/dashboard');
+    return Auth::check() ? redirect('/dashboard') : redirect('/register');
 });
 
 // /dashboard を InventoryController の index() へルーティング
@@ -38,7 +40,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('items/{item}/increment', [ItemController::class, 'increment'])->name('items.increment');
         Route::patch('items/{item}/decrement', [ItemController::class, 'decrement'])->name('items.decrement');
 
-        // 数量を手動入力で更新 ← 新規追加
+        // 数量を手動入力で更新
         Route::patch('items/{item}/quantity', [ItemController::class, 'updateQuantity'])->name('items.updateQuantity');
 
         // 次回購入リストに追加
