@@ -40,6 +40,10 @@
                         </button>
 
                         <nav class="hidden sm:flex space-x-4">
+                            {{-- トップページへのリンク（追加） --}}
+                            <a href="{{ route('dashboard') }}"
+                                class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-200">在庫リスト(TOP)</a>
+
                             <a href="{{ route('purchases.index') }}"
                                 class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-200">次回購入リスト</a>
                             <a href="{{ route('genres.index') }}"
@@ -76,6 +80,10 @@
             {{-- モバイルメニュー --}}
             <div class="sm:hidden hidden" id="mobile-menu">
                 <div class="px-2 pt-2 pb-3 space-y-1">
+                    {{-- トップページへのリンク（追加） --}}
+                    <a href="{{ route('dashboard') }}"
+                        class="block px-3 py-2 rounded text-base font-medium text-gray-700 hover:bg-gray-200">在庫リスト(TOP)</a>
+
                     <a href="{{ route('purchases.index') }}"
                         class="block px-3 py-2 rounded text-base font-medium text-gray-700 hover:bg-gray-200">次回購入リスト</a>
                     <a href="{{ route('genres.index') }}"

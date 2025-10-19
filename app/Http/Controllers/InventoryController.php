@@ -21,7 +21,9 @@ class InventoryController extends Controller
 
         // アクセス可能なジャンルを取得
         $accessibleGenreIds = $this->shareService->getAccessibleGenreIds($user);
-        $genres = Genre::whereIn('id', $accessibleGenreIds)->get();
+        $genres = Genre::whereIn('id', $accessibleGenreIds)
+            ->orderBy('name', 'asc') // 並び順
+            ->get();
 
         // 各ジャンルに共有・編集・削除を付与
         foreach ($genres as $genre) {
@@ -29,7 +31,7 @@ class InventoryController extends Controller
             $genre->canEdit = $this->shareService->canEditGenre($user, $genre);
             $genre->canDelete = $this->shareService->canDeleteGenre($user, $genre);
 
-            // ★ 各ジャンルに関連するアイテム名を確認
+            // 各ジャンルに関連するアイテム名を確認
             logger()->info("Genre: {$genre->name}, Items: " . $genre->items->pluck('name'));
         }
 

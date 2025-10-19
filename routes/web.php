@@ -38,6 +38,9 @@ Route::middleware('auth')->group(function () {
         Route::patch('items/{item}/increment', [ItemController::class, 'increment'])->name('items.increment');
         Route::patch('items/{item}/decrement', [ItemController::class, 'decrement'])->name('items.decrement');
 
+        // 数量を手動入力で更新 ← 新規追加
+        Route::patch('items/{item}/quantity', [ItemController::class, 'updateQuantity'])->name('items.updateQuantity');
+
         // 次回購入リストに追加
         Route::post('items/{item}/purchase', [PurchaseController::class, 'store'])->name('purchases.store');
     });

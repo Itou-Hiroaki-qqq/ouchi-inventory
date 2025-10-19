@@ -3,12 +3,23 @@
 @section('content')
 <div class="py-8 px-4 sm:px-6 lg:px-8">
     <h2 class="font-semibold text-xl text-gray-800 leading-tight mb-6">
-        おうちの在庫くん
+        在庫リスト
     </h2>
+
+    {{-- JavaScript アラート表示（数量変更・増減時は除外） --}}
+    @php
+        $alertRoutes = ['purchases.store'];
+    @endphp
+
+    @if(session('success') && in_array(session('from_route'), $alertRoutes))
+        <script>
+            alert(@json(session('success')));
+        </script>
+    @endif
 
     {{-- ジャンルタブ群 --}}
     @if(isset($genres) && $genres->isNotEmpty())
-    <div x-data="{ activeTab: '{{ $genres->first()->id }}' }">
+    <div x-data="{ activeTab: localStorage.getItem('activeTab') || '{{ $genres->first()->id }}' }" x-init="$watch('activeTab', val => localStorage.setItem('activeTab', val))">
         {{-- タブボタン --}}
         <div class="flex overflow-x-auto border-b mb-6 space-x-4">
             @foreach($genres as $genre)
@@ -17,9 +28,6 @@
                 :class="activeTab === '{{ $genre->id }}' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-gray-900'"
                 class="px-3 py-2 text-sm font-medium whitespace-nowrap">
                 {{ $genre->name }}
-                @if (!empty($genre->isShared) && $genre->isShared)
-                <span class="ml-1 text-xs text-gray-500">（共有）</span>
-                @endif
             </button>
             @endforeach
         </div>
@@ -34,9 +42,9 @@
                     type="text"
                     name="name"
                     placeholder="アイテム名"
-                    class="border px-2 py-1 w-full rounded"
+                    class="flex-1 border px-2 py-2 rounded h-13"
                     required>
-                <button type="submit" class="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600">
+                <button type="submit" class="min-w-[80px] bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex justify-center items-center h-13">
                     登録
                 </button>
             </form>
@@ -69,8 +77,18 @@
                             <button class="bg-gray-300 px-2 py-1 rounded hover:bg-gray-400">−</button>
                         </form>
 
-                        {{-- 数量 --}}
-                        <span class="w-8 text-center @if($item->quantity === 0) text-gray-400 @endif">{{ $item->quantity }}</span>
+                        {{-- 数量（クリックして手動入力） --}}
+                        <form method="POST" action="{{ route('items.updateQuantity', [$genre->id, $item->id]) }}" class="inline-block w-16">
+                            @csrf
+                            @method('PATCH')
+                            <input
+                                type="number"
+                                name="quantity"
+                                value="{{ $item->quantity }}"
+                                min="0"
+                                class="w-full text-center border rounded px-1 py-0.5 focus:outline-none focus:ring focus:ring-blue-300"
+                                onchange="this.form.submit()">
+                        </form>
 
                         {{-- 増やすボタン --}}
                         <form method="POST" action="{{ route('items.increment', [$genre->id, $item->id]) }}">

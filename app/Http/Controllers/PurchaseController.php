@@ -50,11 +50,11 @@ class PurchaseController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        /** @var \App\Models\Genre $genre */
         if (!$this->shareService->canAccessGenre($user, $genre) || $item->genre_id !== $genre->id) {
             abort(403);
         }
 
+        // すでに登録されていない場合のみ作成
         if (!Purchase::where('item_id', $item->id)->exists()) {
             Purchase::create([
                 'item_id'  => $item->id,
@@ -63,38 +63,40 @@ class PurchaseController extends Controller
             ]);
         }
 
-        return back()->with('success', '次回購入リストに追加しました。');
+        return redirect()->route('dashboard')
+            ->with('success', '次回購入リストに追加しました。')
+            ->with('from_route', 'purchases.store');
     }
 
     /**
      * 「購入やめ」処理（リストから削除）
      */
-    public function destroy(Purchase $purchase)
+    public function destroy(Purchase $purchase, Request $request)
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        /** @var \App\Models\Genre $genre */
         $genre = $purchase->item->genre;
 
         if (!$this->shareService->canAccessGenre($user, $genre)) {
             abort(403);
         }
 
+        $tab = $genre->name ?? null; // 現在のジャンル名を取得
         $purchase->delete();
 
-        return back()->with('success', '購入リストから削除しました。');
+        return redirect()->route('purchases.index', ['tab' => $tab])
+            ->with('success', '購入リストから削除しました。');
     }
 
     /**
      * 「購入済み」処理（数量 +1 & リストから削除）
      */
-    public function complete(Purchase $purchase)
+    public function complete(Purchase $purchase, Request $request)
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        /** @var \App\Models\Genre $genre */
         $genre = $purchase->item->genre;
 
         if (!$this->shareService->canAccessGenre($user, $genre)) {
@@ -105,8 +107,10 @@ class PurchaseController extends Controller
         $item->quantity += 1;
         $item->save();
 
+        $tab = $genre->name ?? null; // 現在のジャンル名を取得
         $purchase->delete();
 
-        return back()->with('success', '購入済みにしました。');
+        return redirect()->route('purchases.index', ['tab' => $tab])
+            ->with('success', '購入済みにしました。');
     }
 }

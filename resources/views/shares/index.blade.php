@@ -20,8 +20,8 @@
         <form method="POST" action="{{ route('shares.store') }}" class="flex space-x-2">
             @csrf
             <input type="email" name="shared_user_email" placeholder="共有するユーザーのメールアドレス"
-                class="border px-3 py-2 rounded w-full" required>
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">共有を追加</button>
+                class="flex-1 border px-2 py-2 rounded h-13" required>
+            <button type="submit" class="min-w-[80px] bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex justify-center items-center h-13">追加</button>
         </form>
         @error('shared_user_email')
         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -33,7 +33,7 @@
     @else
     <ul class="space-y-2">
         @foreach($shares as $share)
-        <li class="border p-3 rounded flex justify-between items-center">
+        <li class="border p-3 rounded flex justify-between items-center font-bold bg-white">
             <div>
                 {{-- 共有先ユーザーの情報表示 --}}
                 <span>{{ $share->sharedUser->name ?? '---' }}</span>

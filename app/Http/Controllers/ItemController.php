@@ -162,4 +162,26 @@ class ItemController extends Controller
 
         return redirect()->route('dashboard')->with('success', '数量を減らしました。');
     }
+
+    /**
+     * 数量を手動入力で更新
+     */
+    public function updateQuantity(Request $request, Genre $genre, Item $item)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$this->shareService->canAccessGenre($user, $genre) || $item->genre_id !== $genre->id) {
+            abort(403);
+        }
+
+        $request->validate([
+            'quantity' => ['required', 'integer', 'min:0'],
+        ]);
+
+        $item->quantity = $request->quantity;
+        $item->save();
+
+        return redirect()->route('dashboard')->with('success', '数量を更新しました。');
+    }
 }

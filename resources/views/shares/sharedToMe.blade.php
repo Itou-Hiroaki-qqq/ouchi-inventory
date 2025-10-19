@@ -7,14 +7,17 @@
     @if($sharedByUsers->isEmpty())
         <p>現在、共有を受けているユーザーはいません。</p>
     @else
+        <h3 class="text-xl font-semibold mb-4">オーナーユーザー</h3>
         <ul class="space-y-2">
             @foreach($sharedByUsers as $share)
-                <li class="border p-3 rounded">
-                    <div>
-                        <span class="font-semibold">{{ $share->ownerUser->name ?? '---' }}</span>
-                        <span class="text-sm text-gray-500 ml-2">({{ $share->ownerUser->email ?? '' }})</span>
-                    </div>
-                </li>
+                @if($share->owner)
+                    <li class="border p-3 rounded">
+                        <div>
+                            <span class="font-semibold">{{ $share->owner->name }}</span>
+                            <span class="text-sm text-gray-500 ml-2">({{ $share->owner->email }})</span>
+                        </div>
+                    </li>
+                @endif
             @endforeach
         </ul>
     @endif

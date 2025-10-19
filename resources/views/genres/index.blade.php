@@ -14,8 +14,8 @@
     <form method="POST" action="{{ route('genres.store') }}" class="mb-6">
         @csrf
         <div class="flex space-x-2">
-            <input type="text" name="name" placeholder="新しいジャンル名" class="border px-2 py-1 w-full rounded" required>
-            <button type="submit" class="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600">追加</button>
+            <input type="text" name="name" placeholder="新しいジャンル名" class="flex-1 border px-2 py-2 rounded h-13" required>
+            <button type="submit" class="min-w-[80px] bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex justify-center items-center h-13">追加</button>
         </div>
         @error('name')
             <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
@@ -25,7 +25,7 @@
     <!-- ジャンル一覧 -->
     <ul class="space-y-2">
         @foreach($genres as $genre)
-            <li class="flex justify-between items-center bg-white p-2 rounded border">
+            <li class="flex justify-between items-center bg-white p-2 rounded border font-bold">
                 <div>
                     <span>{{ $genre->name }}</span>
                     @if ($genre->isShared)
